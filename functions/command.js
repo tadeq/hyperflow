@@ -1,5 +1,6 @@
 var spawn = require('cross-spawn'),
-    fs = require('fs');
+    fs = require('fs'),
+	fetch = require('node-fetch');
 
 function command(ins, outs, context, cb) {
     var exec = context.executor.executable,
@@ -64,7 +65,19 @@ function command_notifyevents(ins, outs, context, cb) {
     cb(null, outs);
 }
 
+function simulate(ins, outs, context, cb) {
+    fetch('http://localhost:8080/simulate', {
+        method: 'POST',
+        body:JSON.stringify(context),
+        headers: {'Content-Type': 'application/json'},
+    }).then(res => {
+        cb(null, outs)
+    }).catch(error => {
+        cb(error, outs)
+    })
+}
 
 exports.command = command;
 exports.command_print = command_print;
 exports.command_notifyevents = command_notifyevents;
+exports.simulate = simulate;

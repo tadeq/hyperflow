@@ -185,6 +185,7 @@ exports.awsLambdaCommand = lambdaCmd.awsLambdaCommand;
 exports.exit = exit;
 exports.command_print = cmd.command_print;
 exports.command_notifyevents = cmd.command_notifyevents;
+exports.simulate = cmd.simulate;
 exports.chooseEvenOdd = chooseEvenOdd;
 exports.echo = echo;
 exports.echoWithDelay = echoWithDelay;
