@@ -65,16 +65,24 @@ function command_notifyevents(ins, outs, context, cb) {
     cb(null, outs);
 }
 
-function simulate(ins, outs, context, cb) {
-    fetch('http://localhost:8080/simulate', {
-        method: 'POST',
-        body:JSON.stringify(context),
-        headers: {'Content-Type': 'application/json'},
-    }).then(res => {
-        cb(null, outs)
-    }).catch(error => {
-        cb(error, outs)
-    })
+async function simulate(ins, outs, context, cb) {
+    try {
+        await context.sendMsgToJob(JSON.stringify(context));
+        await context.jobResult(0);
+        cb(null, outs);
+    } catch (err) {
+        console.error(err);
+        throw err;
+    }
+    // fetch('http://localhost:8080/simulate', {
+    //     method: 'POST',
+    //     body:JSON.stringify(context),
+    //     headers: {'Content-Type': 'application/json'},
+    // }).then(res => {
+    //     cb(null, outs)
+    // }).catch(error => {
+    //     cb(error, outs)
+    // })
 }
 
 exports.command = command;
