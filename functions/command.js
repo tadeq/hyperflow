@@ -68,21 +68,21 @@ function command_notifyevents(ins, outs, context, cb) {
 async function simulate(ins, outs, context, cb) {
     try {
         await context.sendMsgToJob(JSON.stringify(context));
+        if (context.procId === 1) {
+            fetch('http://localhost:8080/simulate', {
+                method: 'GET'
+            }).then(res => {
+                cb(null, outs)
+            }).catch(error => {
+                cb(error, outs)
+            })
+        }
         await context.jobResult(0);
         cb(null, outs);
     } catch (err) {
         console.error(err);
         throw err;
     }
-    // fetch('http://localhost:8080/simulate', {
-    //     method: 'POST',
-    //     body:JSON.stringify(context),
-    //     headers: {'Content-Type': 'application/json'},
-    // }).then(res => {
-    //     cb(null, outs)
-    // }).catch(error => {
-    //     cb(error, outs)
-    // })
 }
 
 exports.command = command;
