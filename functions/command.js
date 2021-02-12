@@ -67,7 +67,11 @@ function command_notifyevents(ins, outs, context, cb) {
 
 async function simulate(ins, outs, context, cb) {
     try {
-        await context.sendMsgToJob(JSON.stringify(context));
+        await context.sendMsgToJob(JSON.stringify({
+            'context': context,
+            'ins': ins.map(input => input.name),
+            'outs': outs.map(output => output.name)
+        }));
         if (context.procId === 1) {
             fetch('http://localhost:8080/simulate', {
                 method: 'GET'
