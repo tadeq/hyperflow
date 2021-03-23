@@ -69,10 +69,11 @@ async function simulate(ins, outs, context, cb) {
     try {
         await context.sendMsgToJob(JSON.stringify({
             'context': context,
-            'ins': ins.map(input => input.name),
-            'outs': outs.map(output => output.name)
+            'ins': ins.map(input => ({'name': input.name, 'size': input.size})),
+            'outs': outs.map(output => ({'name': output.name, 'size': output.size}))
         }));
         if (context.procId === 1) {
+            await new Promise(r => setTimeout(r, 15000));
             fetch('http://localhost:8080/simulate', {
                 method: 'GET'
             }).then(res => {
