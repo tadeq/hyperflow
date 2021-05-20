@@ -2,6 +2,9 @@ var spawn = require('cross-spawn'),
     fs = require('fs'),
 	fetch = require('node-fetch');
 
+var BufferManager = require('./kubernetes/buffer_manager.js').BufferManager;
+let bufferManager = new BufferManager();
+
 function command(ins, outs, context, cb) {
     var exec = context.executor.executable,
         args = context.executor.args;
@@ -22,7 +25,7 @@ function command(ins, outs, context, cb) {
         stderrStream = fs.createWriteStream(context.executor.stderr, {flags: 'w'});
         proc.stderr.pipe(stderrStream);
     }
- 
+
     proc.stdout.on('data', function(data) {
         console.log(exec, 'stdout:' + data);
     });
@@ -67,13 +70,29 @@ function command_notifyevents(ins, outs, context, cb) {
 
 async function simulate(ins, outs, context, cb) {
     try {
-        await context.sendMsgToJob(JSON.stringify({
-            'context': context,
-            'ins': ins.map(input => ({'name': input.name, 'size': input.size})),
-            'outs': outs.map(output => ({'name': output.name, 'size': output.size}))
-        }));
         if (context.procId === 1) {
-            await new Promise(r => setTimeout(r, 15000));
+            bufferManager.overwriteCallback(async (items) => {
+                if (items.length) {
+                    await context.sendMsgToJob(JSON.stringify(items));
+                }
+            });
+            /** Buffer Manager configuration. */
+            buffersConf = context.appConfig.jobAgglomerations;
+            let alreadyConfigured = bufferManager.isConfigured();
+            if (alreadyConfigured === false && buffersConf !== undefined) {
+                bufferManager.configure(buffersConf);
+            }
+        }
+        /** Buffer item. */
+        let item = {
+            'ins': ins.map(input => ({'name': input.name, 'size': input.size})),
+            'outs': outs.map(output => ({'name': output.name, 'size': output.size})),
+            'context': context,
+            'cb': cb
+        };
+        bufferManager.addItem(context.name, item);
+        if (context.procId === 1) {
+            await new Promise(r => setTimeout(r, 3000));
             fetch('http://localhost:8080/simulate', {
                 method: 'GET'
             }).then(res => {

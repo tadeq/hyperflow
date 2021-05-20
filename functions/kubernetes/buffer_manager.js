@@ -20,6 +20,10 @@ class BufferManager {
     return;
   }
 
+  overwriteCallback(cb) {
+    this.cb = cb;
+  }
+
   isConfigured() {
     return this.configured;
   }
